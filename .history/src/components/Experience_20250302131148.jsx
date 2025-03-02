@@ -136,7 +136,7 @@ export const Experience = () => {
                 {config.home.title}
               </SectionTitle>
             </Center>
-            <Heart position-z={isMobile ? -2 : -2.8} position-x={1.8} position-y={2.7} scale={0.1} />
+            <Heart position-z={isMobile ? -5 : -} position-x={1.5} position-y={2.1} scale={0.1} />
 
           </Float>
           <Center disableY disableZ>

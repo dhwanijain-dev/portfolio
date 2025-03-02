@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import {motion } from 'framer-motion'
 import { config } from "../config";
 import { atom, useAtom } from "jotai";
-import { useMobile } from "../hooks/useMobile";
 
 export const projectAtom =atom(config.projects[0])
 
@@ -13,8 +12,6 @@ export const Interface = () => {
     const [hasScrolled,setHasScrolled] = useState(false);
     const scrollData = useScroll()
     const {scrollY} = useScroll()
-
-    const {isMobile} = useMobile()
     const [_project,setProject] = useAtom(projectAtom)
     useFrame(()=>{
         setHasScrolled(scrollData.offset > 0 )
@@ -82,9 +79,9 @@ export const Interface = () => {
                         
                     }
                 }}
-                viewport={{
-                    margin: isMobile ? "-70% 0px 0px 0px" : undefined,
-                }}
+                        viewport={{
+                            margin: isMobile ? "-70% 0px 0px 0px" : undefined,
+                        }}
                 >
                 {config.skills.map((skill,idx)=>(
                   <motion.div
@@ -99,7 +96,7 @@ export const Interface = () => {
                   transition={
                     {
                         duration:1,
-                        delay: isMobile ? 0 : idx * 0.62,
+                        delay:idx * 0.62
                     }
                   }
                   > 
@@ -146,9 +143,6 @@ export const Interface = () => {
                             visible: {
                                 opacity: 1,
                             },
-                        }}
-                        viewport={{
-                            margin: isMobile ? "-70% 0px 0px 0px" : undefined,
                         }}
                     >
                         {config.projects.map((project, idx) => (

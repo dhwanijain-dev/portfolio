@@ -11,7 +11,6 @@ import { useFrame, useGraph } from '@react-three/fiber'
 import { useAnimations, useFBX, useGLTF, useScroll } from '@react-three/drei'
 import { SkeletonUtils } from 'three-stdlib'
 import * as THREE from 'three'
-import { useMobile } from '../hooks/useMobile'
 export function Avatar(props) {
   const { scene } = useGLTF('/models/DhwaniAvatar.glb')
   const clone = React.useMemo(() => SkeletonUtils.clone(scene), [scene])

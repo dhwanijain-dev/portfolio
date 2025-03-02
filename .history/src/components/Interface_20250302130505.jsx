@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import {motion } from 'framer-motion'
 import { config } from "../config";
 import { atom, useAtom } from "jotai";
-import { useMobile } from "../hooks/useMobile";
 
 export const projectAtom =atom(config.projects[0])
 
