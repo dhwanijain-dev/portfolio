@@ -8,12 +8,12 @@ import { Interface } from "./components/Interface";
 import { Menu } from "./components/Menu";
  
  
-const TerminalLoader = ({ onLoadingComplete }) => {
-  const { progress } = useProgress();
+const TerminalLoader = ({ onLoadingComplete, progress }) => {
   const [currentCommandIndex, setCurrentCommandIndex] = useState(0);
   const [currentCharIndex, setCurrentCharIndex] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
   const [allCommandsTyped, setAllCommandsTyped] = useState(false);
+  const [isFullyLoaded, setIsFullyLoaded] = useState(false);
   const containerRef = useRef(null);
 
   const commands = [
@@ -25,6 +25,17 @@ const TerminalLoader = ({ onLoadingComplete }) => {
     "Deploying portfolio shell...",
     "Finalizing setup..."
   ];
+
+  // Check if everything is fully loaded (progress 100% and all commands typed)
+  useEffect(() => {
+    if (progress >= 100 && allCommandsTyped) {
+      // Add a small delay to ensure everything is rendered
+      const timer = setTimeout(() => {
+        setIsFullyLoaded(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [progress, allCommandsTyped]);
  
   useEffect(() => {
     const cursorInterval = setInterval(() => {
@@ -37,10 +48,10 @@ const TerminalLoader = ({ onLoadingComplete }) => {
  
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Enter" && allCommandsTyped) {
+      if (e.key === "Enter" && isFullyLoaded) {
         onLoadingComplete();
       } else if (e.key === "Escape") {
- 
+        // Skip typing animation but still wait for assets to load
         setCurrentCommandIndex(commands.length);
         setCurrentCharIndex(0);
         setAllCommandsTyped(true);
@@ -48,7 +59,7 @@ const TerminalLoader = ({ onLoadingComplete }) => {
     };
 
     const handleTap = () => {
-      if (allCommandsTyped) {
+      if (isFullyLoaded) {
         onLoadingComplete();
       }
     };
@@ -59,7 +70,7 @@ const TerminalLoader = ({ onLoadingComplete }) => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("click", handleTap);
     };
-  }, [allCommandsTyped, onLoadingComplete, commands.length]);
+  }, [isFullyLoaded, onLoadingComplete, commands.length]);
 
  
   useEffect(() => {
@@ -136,7 +147,9 @@ const TerminalLoader = ({ onLoadingComplete }) => {
 
           {allCommandsTyped && (
             <div className="mt-4 text-white text-center animate-pulse">
-              Press Enter or Tap to launch portfolio...
+              {isFullyLoaded 
+                ? "Press Enter or Tap to launch portfolio..." 
+                : `Loading assets... ${Math.round(progress)}%`}
             </div>
           )}
         </div>
@@ -144,9 +157,21 @@ const TerminalLoader = ({ onLoadingComplete }) => {
     </div>
   );
 };
+
+// Component to track loading progress and pass it up
+const LoadingTracker = ({ setProgress }) => {
+  const { progress } = useProgress();
+  
+  useEffect(() => {
+    setProgress(progress);
+  }, [progress, setProgress]);
+  
+  return null;
+};
  
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
@@ -155,12 +180,14 @@ function App() {
   return (
     <>
     
-      {isLoading && <TerminalLoader onLoadingComplete={handleLoadingComplete} />}
+      {isLoading && <TerminalLoader onLoadingComplete={handleLoadingComplete} progress={loadingProgress} />}
       
-        <div className={`portfolio-content w-full h-screen ${isLoading ? 'hidden' : 'block'}`}>
+        <div className={`portfolio-content w-full h-screen ${isLoading ? 'opacity-0 pointer-events-none absolute' : 'block'}`}>
           <Canvas camera={{ position: [0, 0.5, 5], fov: 42 }}>
             <color attach="background" args={["#f5f3ee"]} />
             <fog attach="fog" args={["#f5f3ee", 10, 50]} />
+            
+            <LoadingTracker setProgress={setLoadingProgress} />
 
             <Suspense fallback={null}>
               <ScrollControls pages={config.sections.length} damping={0.1} maxSpeed={0.2}>
